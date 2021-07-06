@@ -1,0 +1,28 @@
+.container {
+    margin-top: 5%;
+    align-content: center;
+    padding: 0;
+    margin-bottom: 3%;
+} 
+.card{
+    background-color: rgba(0,0,0,0.5) !important;
+    color: #fff;
+}
+.card-header{
+    background-color: rgba(0,0,0,0.8) !important;
+}
+.text-center {
+    text-align: center;
+}
+#inputSearch{
+    margin-left: 1rem;
+    width: 5px;
+}
+#container-buttons{
+    margin-left: 1rem;
+}
+#btn-eliminar{
+    margin-left:5px;
+}
+
+  

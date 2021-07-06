@@ -1,0 +1,17 @@
+.container{
+    height: 100%;
+    margin-top: 20%;
+    align-content: center;
+}
+.card{
+    height: 100%;
+    margin-top: auto;
+    margin-bottom: auto;
+    width: 400px;
+    background-color: rgba(0,0,0,0.5) !important;
+}
+.btn{
+    color: black;
+    width: 100%;
+}
+    

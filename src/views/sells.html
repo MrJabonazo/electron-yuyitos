@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/sells.css">
+    <link rel="stylesheet" href="style.css">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>    
+    <title>Document</title>
+</head>
+<body class="generic-body">
+    <div class="container">
+        <div class="card mh-50">
+            <div class="card-header">
+                <h1 class="text-center">
+                    Venta
+                </h1>
+                <button class="btn btn-success" id="addProduct">Agregar Producto</button>
+                <button class="btn btn-danger" id="deleteProducto" disabled>Eliminar Producto</button>
+            </div>
+            <div class="card-body">
+                <table class="table table-light" id="tableProductos">
+                    <thead class="thead-light">
+                        <th>Cod Producto</th>
+                        <th>Nombre Producto</th>
+                        <th>Cantidad</th>
+                        <th>Precio</th>
+                        <th>Total</th>
+                    </thead>
+                    <tbody id="tbodyProductos">
+
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer text-center">
+                <h1 id="totalVenta"></h1>
+                <div class="form-group form-check">
+                    <input type="checkbox" class="form-check-input" id="checkFiado">
+                    <label class="form-check-label" for="checkFiado">Fiar</label>
+                    <button class="btn btn-success" id="btnVenta" disabled>Finalizar Venta</button>
+                </div>
+                
+            </div>
+        </div>
+    </div>    
+    <script type="module">
+        const { ipcRenderer, Notification } = require('electron');
+        localStorage.setItem("Productos","");
+        let productos = [];
+        let total = 0;
+        let templateProductos = "";
+        totalVenta.innerHTML = "$"+total;
+        //Agregar Producto Al carrito de compras
+        ipcRenderer.on('addProducto', (e,product) =>{
+            const {id_prod, nombre_prod, marca_prod, cod_barra, fch_elab, fhc_vct, 
+                fml_pdt, tipo_prod, cant_pqt, pco_uni, gmj_pdt, flag_vgn, cant_stock, 
+                fech_ingreso, fech_actualizacion, proveedor, descripcion, cant_deseada} = product;
+            
+            let itsOnTheCart = false;
+            if(productos.length === 0){
+                productos[0] = product;
+                document.getElementById("deleteProducto").disabled = false;
+                document.getElementById("btnVenta").disabled = false;
+            }else{
+                document.getElementById("deleteProducto").disabled = false;
+                document.getElementById("btnVenta").disabled = false;
+                
+                for (let i = 0; i < productos.length; i++) {
+                    if(productos[i].cod_barra === cod_barra){
+                        itsOnTheCart = true;
+                        productos[i].cant_deseada = parseInt(cant_deseada) + parseInt(productos[i].cant_deseada);
+                    }
+                }
+                if(!itsOnTheCart){
+                    productos.push(product);
+                }
+                templateProductos = "";
+                total = 0;
+            }
+            listarProductos();
+        });
+
+        ipcRenderer.on('deleteProducto', (e,product) =>{
+            var {codProducto, cantProducto} = product;
+            let cont = 0;
+            let contInd = 0;
+            let itsTrue = false;
+            for (let index = 0; index < productos.length; index++) {
+                if(productos[index].cod_barra == codProducto){
+                    cont++;
+                    itsTrue = true;
+                }
+                if(itsTrue){
+                    break;
+                }
+                contInd++;
+            }
+            if(cont === 0){  
+                alert("Producto no existe dentro de su compra")
+            }else{
+                if(cantProducto > productos[contInd].cant_deseada ){
+                    cantProducto = productos[contInd].cant_deseada;
+                }
+                for (let i = 0; i < productos.length; i++) {
+                    if(productos[i].cod_barra === codProducto){
+                        templateProductos = "";
+                        total = 0;
+                        if(productos[i].cant_deseada - cantProducto != 0){
+                            productos[i].cant_deseada = parseInt(productos[i].cant_deseada) - parseInt(cantProducto) ;
+                        }
+                        else{
+                            productos.splice(i, 1);
+                        }
+                        listarProductos();
+                    }
+                }
+            }
+        })
+
+        function listarProductos(){
+            for (let i = 0; i < productos.length; ++i) {
+                templateProductos += "<tr>"+
+                                    "<td>"+productos[i].cod_barra+"</td>"+
+                                    "<td>"+productos[i].nombre_prod+"</td>"+
+                                    "<td>"+productos[i].cant_deseada+"</td>"+
+                                    "<td>"+productos[i].pco_uni+"</td>"+
+                                    "<td>"+productos[i].pco_uni * productos[i].cant_deseada+"</td>"
+                                    +"</tr>";
+                total += productos[i].pco_uni*productos[i].cant_deseada;
+            }
+            tbodyProductos.innerHTML = templateProductos;
+            totalVenta.innerHTML = "$"+total;
+            localStorage.setItem('Productos',JSON.stringify(productos));
+        }
+    </script>
+</body>
+</html>

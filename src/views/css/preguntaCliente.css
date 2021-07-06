@@ -1,0 +1,14 @@
+.card{
+    background-color: rgba(0,0,0,0.5) !important;
+    color: #fff;
+}
+.container{
+    height: 100%;
+    margin-top: 20%;
+    align-content: center;
+}
+.btn{
+    color: black;
+    width: 100%;
+}
+    
