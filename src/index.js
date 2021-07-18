@@ -1,9 +1,11 @@
 const { app, BrowserWindow, ipcMain, Notification} = require('electron');
-var LocalStorage = require('node-localstorage').LocalStorage,
-localStorage2 = new LocalStorage('./scratch');
+const { deleteFileEmployee,deleteFileProducts } = require('./helpers/storage');
 const url = require('url');
 const path = require('path');
 const db =  require('./config/database');
+//Controladores
+const loginCtrl = require('./controllers/login.controller');
+const prdctsCtrl = require('./controllers/producto.controller')
 //Ventanas para abrir
 let mainWindow;
 let selectOptionWin;
@@ -25,7 +27,7 @@ require('electron-reload')(__dirname, {
 function loginWindow () {
     mainWindow = new BrowserWindow({
         webPreferences: {
-            preload:path.join(__dirname, 'login.js'),
+            preload:path.join(__dirname, 'js/login.js'),
             nodeIntegration: true,
             contextIsolation: false,
             enableRemoteModule: true,
@@ -45,7 +47,7 @@ function loginWindow () {
 function selectWindow (){
     selectOptionWin = new BrowserWindow({
         webPreferences: {
-            preload:path.join(__dirname, 'selectOption.js'),
+            preload:path.join(__dirname, 'js/selectOption.js'),
             nodeIntegration: true,
             contextIsolation: false,
             enableRemoteModule: true,
@@ -67,7 +69,7 @@ function sellWindow(){
             nodeIntegration: true,
             contextIsolation: false,
             enableRemoteModule: true,
-            preload:path.join(__dirname, 'sells.js'),
+            preload:path.join(__dirname, 'js/sells.js'),
         },
         minWidth: 1080,
         width: 1200,
@@ -83,7 +85,7 @@ function sellWindow(){
 function fiarWindow(){
     fiarWin = new BrowserWindow({
         webPreferences: {
-            preload:path.join(__dirname, 'fiado.js'),
+            preload:path.join(__dirname, 'js/fiado.js'),
             nodeIntegration: true,
             contextIsolation: false,
             enableRemoteModule: true,
@@ -102,7 +104,7 @@ function fiarWindow(){
 function addProductoWindow(){
     addProductWin = new BrowserWindow({
         webPreferences: {
-            preload:path.join(__dirname, 'addProducto.js'),
+            preload:path.join(__dirname, 'js/addProducto.js'),
             nodeIntegration: true,
             contextIsolation: false,
             enableRemoteModule: true,
@@ -124,7 +126,7 @@ function addProductoWindow(){
 function deleteProductWindow(){
     deleteProductWin = new BrowserWindow({
         webPreferences: {
-            preload:path.join(__dirname, 'deleteProducto.js'),
+            preload:path.join(__dirname, 'js/deleteProducto.js'),
             nodeIntegration: true,
             contextIsolation: false,
             enableRemoteModule: true,
@@ -146,7 +148,7 @@ function deleteProductWindow(){
 function preguntaClienteWindows(){
     preguntaClienteWin = new BrowserWindow({
         webPreferences: {
-            preload:path.join(__dirname, 'preguntaClienteWin.js'),
+            preload:path.join(__dirname, 'js/preguntaClienteWin.js'),
             nodeIntegration: true,
             contextIsolation: false,
             enableRemoteModule: true,
@@ -168,7 +170,7 @@ function preguntaClienteWindows(){
 function cierreDeVentaWindows(){
     cierreDeVentaWin = new BrowserWindow({
         webPreferences: {
-            preload:path.join(__dirname, 'cierreDeVenta.js'),
+            preload:path.join(__dirname, 'js/cierreDeVenta.js'),
             nodeIntegration: true,
             contextIsolation: false,
             enableRemoteModule: true,
@@ -228,100 +230,36 @@ ipcMain.on('deleteProductFromCart', (e,producto) =>{
     sellWin.webContents.send('deleteProducto',producto);
     deleteProductWin.close();
 });
-
-//Funciones con conexion a db
 //AgregarProducto a la venta
 ipcMain.on('addProductoToCart', async (e,producto) => {
-    const {codProducto, cantProducto} = producto;
-    const sql = "SELECT * FROM PRODUCTO WHERE COD_BRR_PDT = :codProducto";
-    const result = await db.Open(sql,[codProducto]);
-    let productSearch = result.rows;
-    if(productSearch.length === 0){
+    let prod = await prdctsCtrl.saveProducts(producto);
+    if(prod === 401){
         new Notification({
             title:"Porducto no encontrado",
             body: 'El codigo del producto esta erroneo'
         }).show()
     }else{
-        Producto = [];
-        result.rows.map(product =>{
-            let prod = {
-                "id_prod": product[0],
-                "nombre_prod": product[1],
-                "marca_prod": product[2],
-                "cod_barra": product[3],
-                "fch_elab": product[4],
-                "fch_vct": product[5],
-                "fml_pdt": product[6],
-                "tipo_prod": product[7],
-                "cant_pqt": product[8],
-                "pco_uni": product[9],
-                "gmj_pdt": product[10],
-                "flag_vgn": product[11],
-                "cant_stock": product[12],
-                "fech_ingreso": product[13],
-                "fech_actualizacion": product[14],
-                "proveedor": product[15],
-                "descripcion": product[16],
-                "cant_deseada": cantProducto
-            }
-            console.log(prod);
-            Producto.push(prod);
-        });
+        sellWin.webContents.send('addProducto',prod);
+        addProductWin.close();
     }
-    // console.log(Producto);
-    sellWin.webContents.send('addProducto',Producto[0]);
-    addProductWin.close();
 })
-
 //Funcion para validar el login
 validateLogin = async (obj) =>{
-    const {username, password} = obj;
-    const sql = "SELECT * FROM EMPLEADO WHERE USR_EMP = :username AND PSS_EMP = :password ";
-    const result = await db.Open(sql,[username, password]);
-    let userSearch = result.rows;
-    if(userSearch.length === 0){
+    let status = await loginCtrl.singIn(obj);
+    if(status !== 200){
         new Notification({
             title:"login",
             body: 'Email o password equivocado'
         }).show()
-    }
-    else if(userSearch.length === 0){
-        new Notification({
-            title:"login",
-            body: 'Usuario esta duplicado'
-        }).show()
     }else{
-        Usuario= []
-        result.rows.map(user =>{
-            let userSchema = {
-                "rut": user[0],
-                "nombre": user[1],
-                "p_apellido": user[2],
-                "s_apellido": user[3],
-                "f_nacimineto": user[4],
-                "direccion": user[5],
-                "nro_direccion": user[6],
-                "estado": user[7],
-                "admin": user[8],
-                "usuario": user[9],
-                "password": user[10],
-                "email": user[11],
-                "sueldo": user[14],
-            }
-            Usuario.push(userSchema);
-        })
-        //Se guarda el rut en una variable de storage
-        localStorage2.setItem('rut',Usuario[0].rut);
         selectWindow();
         selectOptionWin.show();
         mainWindow.close();
-    }   
+    }
 }
 //Iniciado de la app
 app.whenReady().then(loginWindow);
 app.on('window-all-closed', () => {
-    if(localStorage2.getItem('Productos') || localStorage2.getItem('rut') ){
-        localStorage2.clear();
-    }
-    app.quit();
+    loginCtrl.deleteEmployee();
+    prdctsCtrl.deleteProducts();
 });

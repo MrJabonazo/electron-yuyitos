@@ -9,6 +9,4 @@ module.exports = {
         host: 'localhost/XE',
         port: 1521,
     }
-
-
 }

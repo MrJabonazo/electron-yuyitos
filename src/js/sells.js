@@ -1,6 +1,5 @@
 const { ipcRenderer} = require('electron');
-var LocalStorage = require('node-localstorage').LocalStorage,
-localStorage2 = new LocalStorage('./scratch');
+const { saveProducts } = require('../helpers/storage');
 
 let btnAddProduct;
 let btnDeleteProduct;
@@ -28,9 +27,9 @@ window.onload = () =>{
     }
 
     btnVenta.onclick = function(){
-        productos = localStorage.getItem("Productos");
+        productos = JSON.parse(localStorage.getItem("Productos"));
         localStorage.clear();
-        localStorage2.setItem('Productos',productos);
+        saveProducts(productos);
         if(checkFiado.checked == true){
             check = 1;
         }else{
