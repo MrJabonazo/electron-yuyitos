@@ -1,11 +1,10 @@
 const { ipcRenderer} = require('electron');
-const { saveProducts } = require('../helpers/storage');
+const { saveData } = require('../helpers/storage');
 
 let btnAddProduct;
 let btnDeleteProduct;
 let btnVenta;
 let checkFiado;
-let productos =  [];
 let check;
 
 window.onload = () =>{
@@ -27,16 +26,15 @@ window.onload = () =>{
     }
 
     btnVenta.onclick = function(){
-        productos = JSON.parse(localStorage.getItem("Productos"));
+        productosCarrito = JSON.parse(localStorage.getItem("Productos"));
+        saveData(productosCarrito,'productos');
         localStorage.clear();
-        saveProducts(productos);
         if(checkFiado.checked == true){
             check = 1;
         }else{
             check = 0;
         }
-        const obj = {productos: productos, fiado: check};
+        const obj = {fiado: check};
         ipcRenderer.invoke("exitsteFiado",obj)
-        
     }
 }

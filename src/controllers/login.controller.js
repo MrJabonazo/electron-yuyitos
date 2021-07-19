@@ -1,5 +1,5 @@
 const db =  require('../config/database');
-const { saveEmployee, deleteFileEmployee } =  require('../helpers/storage');
+const { saveData, deleteFileData } =  require('../helpers/storage');
 const loginCtrl = {};
 
 loginCtrl.singIn = async(request)=>{
@@ -9,7 +9,7 @@ loginCtrl.singIn = async(request)=>{
     let userSearch = result.rows;
     if(userSearch.length === 0){
         return 401;
-    } else if(userSearch.length === 0){
+    } else if(userSearch.length > 1){
         return 401;
     }else{
         Usuario= []
@@ -30,16 +30,16 @@ loginCtrl.singIn = async(request)=>{
                 "sueldo": user[14],
             }
             Usuario.push(userSchema);
-        })
+        });
         //Se guarda el rut en una variable de storage
         let rut = Usuario[0].rut
-        saveEmployee(rut);
+        saveData(rut,'empleado');
         return 200;
     }   
 }
 
 loginCtrl.deleteEmployee = () =>{
-    deleteFileEmployee();
+    deleteFileData('empleado');
 }
 
 module.exports = loginCtrl;

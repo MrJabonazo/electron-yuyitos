@@ -1,6 +1,6 @@
 
 const db =  require('../config/database');
-const { deleteFileProducts } = require('../helpers/storage');
+const { deleteFileData } = require('../helpers/storage');
 const prdctsCtrl = {};
 
 prdctsCtrl.saveProducts = async (request) =>{
@@ -40,6 +40,6 @@ prdctsCtrl.saveProducts = async (request) =>{
 }
 
 prdctsCtrl.deleteProducts = () =>{
-    deleteFileProducts();
+    deleteFileData("productos");
 }
 module.exports = prdctsCtrl;

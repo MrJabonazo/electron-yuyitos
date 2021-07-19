@@ -14,21 +14,50 @@
 </head>
 <body class="generic-body">
     <div class="container">
-        <div class="card">
+        <div class="card text-center">
             <div class="card-header">
                 <h1>Factura</h1>
             </div>
-            <div class="card-body">
-                <p>cantidad Porduto codigo ............................... debito</p>
-                <p>cantidad Porduto codigo ............................... debito</p>
-                <p>cantidad Porduto codigo ............................... debito</p>
-                <p>cantidad Porduto codigo ............................... debito</p>
+            <div class="card-body" id="getProducts">
             </div>
-            <div class="card-footer">Monto total............$123123123213</div>
+            <div class="card-footer" id="datosPago">
+                
+            </div>
         </div>
-        <div>
-            <button class="btn btn-success" >Finalizar</button>
+        <div class="d-flex">
+            <button class="btn btn-success" id="btnVolver">Finalizar</button>
         </div>
     </div>
+    <script type="module">
+        const {readData} = require('../helpers/storage.js');
+        let templateTotal = "Monto Total ";
+        let templateVuelto = "Vuelto ";
+        let metodoPago = readData('metodoPago').pago;
+        let products = readData('productos');
+        let templateFactura = "";
+        let totalPago = 0;
+        for (const item of products) {
+            let cantChar = item.cant_deseada.toString().trim().length + item.nombre_prod.trim().length + item.cod_barra.toString().trim().length + item.cant_deseada.toString().trim().length + item.pco_uni.toString().trim().length;
+            console.log(cantChar);
+            let addDot = "";
+            while((addDot.length + cantChar) != 90){
+                addDot += "."
+            }
+            console.log(addDot.length);
+            templateFactura+= `<h5>${item.cant_deseada} * ${item.nombre_prod} ${item.cod_barra}${addDot}$${item.cant_deseada+item.pco_uni}</h5><hr>`;
+            totalPago+=item.cant_deseada*item.pco_uni;
+        }
+        while((templateTotal.length + totalPago.toString().length) < 110){
+            templateTotal+="."
+        }
+        templateTotal += ` $${totalPago}`;
+        let vuelto = parseInt(metodoPago) - totalPago;
+        while((templateVuelto.length + vuelto.toString.length) < 110){
+            templateVuelto += "."
+        }
+        templateVuelto += ` $${vuelto}`;
+        datosPago.innerHTML = `<h5>${templateTotal}</h5><h5>${templateVuelto}</h5>`;
+        getProducts.innerHTML = templateFactura;
+    </script>
 </body>
 </html>

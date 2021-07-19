@@ -1,11 +1,13 @@
 const { app, BrowserWindow, ipcMain, Notification} = require('electron');
-const { deleteFileEmployee,deleteFileProducts } = require('./helpers/storage');
+const { deleteFileData, readData, saveData } = require('./helpers/storage');
 const url = require('url');
 const path = require('path');
 const db =  require('./config/database');
 //Controladores
 const loginCtrl = require('./controllers/login.controller');
-const prdctsCtrl = require('./controllers/producto.controller')
+const prdctsCtrl = require('./controllers/producto.controller');
+const clntCtrl = require('./controllers/cliente.controller');
+const vltCtrl = require('./controllers/venta.controller');
 //Ventanas para abrir
 let mainWindow;
 let selectOptionWin;
@@ -15,6 +17,7 @@ let addProductWin;
 let deleteProductWin;
 let preguntaClienteWin;
 let buscaCliente;
+let cierreAbonoWin;
 let cierreDeVentaWin;
 //Sirve para cargar el contenido cuando esta abierto la app
 require('electron-reload')(__dirname, {
@@ -185,14 +188,99 @@ function cierreDeVentaWindows(){
         slashes: true,
     }));
 }
+
+function realizarPagoWindows(){
+    realizarPagoWin = new BrowserWindow({
+        webPreferences: {
+            preload:path.join(__dirname, 'js/realizarPagoWin.js'),
+            nodeIntegration: true,
+            contextIsolation: false,
+            enableRemoteModule: true,
+        },
+        minWidth: 500,
+        maxWidth: 500,
+        minHeight: 500,
+        maxHeight: 500,
+        width: 700,
+        height:450
+    })
+    realizarPagoWin.loadURL(url.format({
+        pathname: path.join(__dirname, 'views/realizarPago.html'),
+        protocol: 'file',
+        slashes: true,
+    }));
+}
+function cierreAbonoWindow(){
+    cierreAbonoWin = new BrowserWindow({
+        webPreferences: {
+            preload:path.join(__dirname, 'js/cierreAbono.js'),
+            nodeIntegration: true,
+            contextIsolation: false,
+            enableRemoteModule: true,
+        },
+        minWidth: 500,
+        maxWidth: 500,
+        minHeight: 500,
+        maxHeight: 500,
+        width: 700,
+        height:450
+    })
+    cierreAbonoWin.loadURL(url.format({
+        pathname: path.join(__dirname, 'views/cierreAbono.html'),
+        protocol: 'file',
+        slashes: true,
+    }));
+}
 //Manejadores
 //Selection Venta o Fiado
-ipcMain.handle('selection', (event,obj) =>{
+ipcMain.handle("volverEleccion", async (e,obj) =>{
+    selectWindow();
+    selectOptionWin.show();
+    cierreAbonoWindow();
+    if(cierreAbonoWin.isEnabled){
+        cierreAbonoWin.close();
+    }
+    cierreDeVentaWin();
+    if(cierreDeVentaWin.isEnabled){
+        cierreDeVentaWin.close();
+    }
+})
+ipcMain.handle("realizarAbono", async (e,obj) =>{
+    let clientes = await clntCtrl.searchCliente();
+    saveData(clientes,"clientes");
+    let status = await clntCtrl.pagarDeuda(obj);
+    if(status != 200){
+        console.log(status);
+    }else{
+        cierreAbonoWindow();
+        cierreAbonoWin.show();
+        fiarWin.close();
+    }
+})
+
+ipcMain.handle('mostrarBoleta', (e,obj) =>{
+    vltCtrl.realizarVenta();
+    vltCtrl.realizarBlta();
+    let {opcion, pago} = obj;
+    saveData(obj,"metodoPago");
+    preguntaClienteWindows();
+    if(preguntaClienteWin.isEnabled()){
+        preguntaClienteWin.close();
+    }
+    cierreDeVentaWindows();
+    cierreDeVentaWin.show();
+    sellWin.close();
+    realizarPagoWin.close();
+})
+ipcMain.handle('selection', async (event,obj) =>{
     if(obj == 1){
         sellWindow();
         sellWin.show();
         selectOptionWin.close();
     }else{
+        let clientes = await clntCtrl.searchClienteDeudor();
+        console.log(clientes)
+        saveData(clientes, "clientes");
         fiarWindow();
         fiarWin.show();
         selectOptionWin.close();
@@ -213,26 +301,28 @@ ipcMain.handle('openWindowDeleteProduct',(event, obj) =>{
     deleteProductWindow();
     deleteProductWin.show();
 });
-//Preguntar SI el cliente existe
-ipcMain.handle('exitsteFiado',(event,obj) => {
-    let {producto, fiado} = obj;
+ipcMain.handle('exitsteFiado',async (event,obj) =>{
+    let {fiado} = obj;
     if(fiado === 1){
-        preguntaClienteWindows();
-        preguntaClienteWin.show();
+        let clientes = await clntCtrl.searchClienteHabilitado();
+        saveData(clientes,'clientes');
+        if(clientes != 401){
+            preguntaClienteWindows();
+            preguntaClienteWin.show();
+        }
     }else{
-        cierreDeVentaWindows();
-        cierreDeVentaWin.show();
-        sellWin.close();
+        realizarPagoWindows();
+        realizarPagoWin.show();
     }
-})
-//Borrar un prodcuto del carrito de compras
+});
+//Borrar un to del carrito de compras
 ipcMain.on('deleteProductFromCart', (e,producto) =>{
     sellWin.webContents.send('deleteProducto',producto);
     deleteProductWin.close();
 });
 //AgregarProducto a la venta
 ipcMain.on('addProductoToCart', async (e,producto) => {
-    let prod = await prdctsCtrl.saveProducts(producto);
+    let prod = await prdctsCtrl.saveProducts(producto,"producto");
     if(prod === 401){
         new Notification({
             title:"Porducto no encontrado",
@@ -262,4 +352,5 @@ app.whenReady().then(loginWindow);
 app.on('window-all-closed', () => {
     loginCtrl.deleteEmployee();
     prdctsCtrl.deleteProducts();
+    app.quit()
 });

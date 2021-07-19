@@ -4,31 +4,37 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Borrar Producto</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="css/addProduct.css">
+    <link rel="stylesheet" href="css/fiar.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>    
+    <title>Document</title>
 </head>
-<body class="addProductImg">
+<body class="generic-body">
     <div class="container">
         <div class="card">
             <div class="card-header">
-                <h1 class="text-center">
-                    Borrar Producto
-                </h1>
+                Pagar Fiado
             </div>
             <div class="card-body">
-                <div class="form-group">
-                    <input type="text" onkeypress='validate(event)' class="form-control" id="codProducto" placeholder="Codigo del producto">
+                <div class="input-group form-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                    </div>
+                    <select class="form-select" id="selectRut" aria-label="Default select example">
+                        <option selected value="0">Selecccione Rut</option>
+                    </select>
+                </div>
+                <div id="monto_Debido" class="text-center" hidden >
+                    
                 </div>
                 <div class="form-group">
-                    <input type="text" onkeypress='validate(event)' class="form-control" id="amount" placeholder="Unidades del producto">
+                    <input type="text" class="form-control" id="pagarAbono" placeholder="Manto a abonar">
                 </div>
-                <div class="form-group">
-                    <button class="btn btn-warning" id="deleteProducto">Borrar Producto</button>
+                <div class="form-group" id="login">
+                    <button class="btn btn-warning" disabled id="btnPagar">Pagar</button>
                 </div>
             </div>
         </div>

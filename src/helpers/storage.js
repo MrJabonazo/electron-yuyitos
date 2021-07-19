@@ -1,46 +1,30 @@
 const fs = require('fs');
-const empleado = './storage/empleado.json';
-const productos = './storage/productos.json'
+
+//prueba
+let jsonUrl = "";
 //Empelado Storage
-const saveEmployee = (data) => {   
-    fs.writeFileSync(empleado, JSON.stringify(data));
+const saveData = (data,url) => {  
+    jsonUrl = `./storage/${url}.json`;
+    fs.writeFileSync(jsonUrl, JSON.stringify(data));
 }
 
-const readEmployees = () => {
-    if(!fs.existsSync(empleado)){
+const readData = (url) => {
+    jsonUrl = `./storage/${url}.json`;
+    if(!fs.existsSync(jsonUrl)){
         return null;
     }
-    const info = fs.readFileSync(empleado, {encoding: 'utf8'});
+    const info = fs.readFileSync(jsonUrl, {encoding: 'utf8'});
     const data = JSON.parse(info);
     return data;
 }
 
-const deleteFileEmployee = () =>{
-    fs.writeFileSync(empleado, "");
-}
-//Productos Storage
-const saveProducts = (data) => {   
-    fs.writeFileSync(productos, JSON.stringify(data));
-}
-
-const readProducts = () => {
-    if(!fs.existsSync(productos)){
-        return null;
-    }
-    const info = fs.readFileSync(productos, {encoding: 'utf8'});
-    const data = JSON.parse(info);
-    return data;
-}
-
-const deleteFileProducts = () =>{
-    fs.writeFileSync(productos, "");
+const deleteFileData = (url) =>{
+    jsonUrl = `./storage/${url}.json`;
+    fs.writeFileSync(jsonUrl, "");
 }
 
 module.exports = {
-    saveEmployee,
-    readEmployees,
-    deleteFileEmployee,
-    saveProducts,
-    readProducts,
-    deleteFileProducts
+    saveData,
+    readData,
+    deleteFileData
 };

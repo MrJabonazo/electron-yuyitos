@@ -22,10 +22,10 @@
             </div>
             <div class="card-body">
                 <div class="form-group">
-                    <input type="text" class="form-control" id="codProducto" placeholder="Codigo del producto">
+                    <input type="text" onkeypress='validate(event)' class="form-control" id="codProducto" placeholder="Codigo del producto">
                 </div>
                 <div class="form-group">
-                    <input type="text" class="form-control" id="amount" placeholder="Unidades del producto">
+                    <input type="text" onkeypress='validate(event)' class="form-control" id="amount" placeholder="Unidades del producto">
                 </div>
                 <div class="form-group">
                     <button class="btn btn-warning" id="btnAddProducto">Agregar</button>

@@ -12,6 +12,13 @@
     background-attachment: fixed;
     font-family: 'Numans', sans-serif;
 }
+.makeSell{
+    background-image: url('img/metodo_pago_opt.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    font-family: 'Numans', sans-serif;
+}
 .card-header h3{
 color: white;
 }

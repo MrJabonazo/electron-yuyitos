@@ -1,3 +1,13 @@
 .container{
     margin-top: 3%;
+    display: table;
+}
+.card{
+    margin: 0 auto;
+    width: 50rem;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+.btn{
+    margin: 0 auto;
+    margin-top: 3rem;
 }
