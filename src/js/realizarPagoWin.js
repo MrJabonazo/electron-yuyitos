@@ -1,5 +1,5 @@
-const { ipcRenderer, ipcMain } = require('electron');
-
+const { ipcRenderer } = require('electron');
+const { readData } = require("../helpers/storage");
 let btnSelct, slcPay, inputPago;
 
 window.onload = () =>{
@@ -34,12 +34,20 @@ window.onload = () =>{
             document.getElementById("groupInput").hidden = false;
         }
     }
+    let monto = 0;
+    for (const item of readData("productos")) {
+        monto += (item.pco_uni*item.cant_deseada);
+    }   
 
     btnSelct.onclick = () =>{
         let opcion = slcPay.value;
         let pago = inputPago.value;
         let objeto = {opcion: opcion, pago: pago};
-        ipcRenderer.invoke("mostrarBoleta", objeto);
+        if(inputPago.value < monto){
+            alert("El monto a pagar es mucho mayor al ingresado");
+        }else{
+            ipcRenderer.invoke("mostrarBoleta", objeto);
+        }
     }
     
 }
